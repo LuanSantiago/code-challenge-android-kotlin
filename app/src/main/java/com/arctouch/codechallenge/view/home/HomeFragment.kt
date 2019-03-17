@@ -1,19 +1,19 @@
 package com.arctouch.codechallenge.view.home
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.arctouch.codechallenge.R
-import com.arctouch.codechallenge.model.Movie
 import com.arctouch.codechallenge.util.InjectorUtils
 import com.arctouch.codechallenge.viewmodel.HomeViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
+
 
 class HomeFragment : Fragment() {
 
@@ -35,24 +35,29 @@ class HomeFragment : Fragment() {
         this.context?.let { context ->
             val factory = InjectorUtils().provideViewModelFactory(context)
             viewModel = ViewModelProviders.of(this, factory).get(HomeViewModel::class.java)
+            setupHome()
             observe()
-            progressBar.visibility = View.VISIBLE
         }
     }
 
     private fun observe(){
-        viewModel.movies.observe(this, Observer { movies ->
-            updateUI(movies)
+        viewModel.getUpcomingMovies().observe(this, Observer { movies ->
+           homePagedAdapter.submitList(movies)
+           progressBar.visibility = View.GONE
         })
     }
 
-    private fun updateUI(moviesWithGenres: List<Movie>){
-        recyclerView.adapter = HomeAdapter(moviesWithGenres){ movie ->
-            val bundle = Bundle()
-            bundle.putParcelable("movie",movie)
-            view?.findNavController()?.navigate(R.id.action_homeFragment_to_movieDetailFragment,bundle)
-        }
-        progressBar.visibility = View.GONE
+    private fun setupHome(){
+        progressBar.visibility = View.VISIBLE
+        val linearLayoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = linearLayoutManager
+        recyclerView.adapter = homePagedAdapter
+    }
+
+    private val homePagedAdapter = HomePagedAdapter{ movie ->
+        val bundle = Bundle()
+        bundle.putParcelable("movie",movie)
+        view?.findNavController()?.navigate(R.id.action_homeFragment_to_movieDetailFragment,bundle)
     }
 
 }

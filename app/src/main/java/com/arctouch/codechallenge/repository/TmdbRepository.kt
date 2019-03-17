@@ -1,47 +1,38 @@
 package com.arctouch.codechallenge.repository
 
+import androidx.paging.DataSource
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.arctouch.codechallenge.data.Cache
-import com.arctouch.codechallenge.model.Genre
 import com.arctouch.codechallenge.model.Movie
-import com.arctouch.codechallenge.remote.TmdbDataSource
+import com.arctouch.codechallenge.remote.datasource.TmdbDataSource
+import com.arctouch.codechallenge.remote.datasource.TmdbRemoteDataSource
 
-class TmdbRepository(private val tmdbRemoteDataSource: TmdbDataSource): TmdbDataSource {
+class TmdbRepository(private val tmdbRemoteDataSource: TmdbDataSource) {
 
 
-    override fun getGenres(
+    fun getGenres(
         key: String,
-        language: String,
-        success: (genres: List<Genre>) -> Unit,
-        error: (message: String) -> Unit
+        language: String
     ) {
         tmdbRemoteDataSource.getGenres(key,language,
             success = {
                 Cache.cacheGenres(it)
-                success(it)
             },
             error = {
-                error(it)
+
             })
     }
 
-    override fun upcomingMovies(
-        key: String,
-        language: String,
-        page: Long,
-        region: String,
-        success: (movies: List<Movie>) -> Unit,
-        error: (message: String) -> Unit
-    ) {
-        tmdbRemoteDataSource.upcomingMovies(key,language,page,region,
-            success = { movies ->
-                val moviesWithGenres = movies.map { movie ->
-                    movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
-                }
-                success(moviesWithGenres)
-            },
-            error = {
-                error(it)
-            })
+    fun initializedPagedListBuilder(config: PagedList.Config):
+            LivePagedListBuilder<Long, Movie> {
+
+        val dataSourceFactory = object : DataSource.Factory<Long, Movie>() {
+            override fun create(): DataSource<Long, Movie> {
+                return TmdbRemoteDataSource()
+            }
+        }
+        return LivePagedListBuilder<Long, Movie>(dataSourceFactory, config)
     }
 
     companion object {

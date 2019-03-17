@@ -1,7 +1,7 @@
-package com.arctouch.codechallenge.remote
+package com.arctouch.codechallenge.remote.datasource
 
 import com.arctouch.codechallenge.model.Genre
-import com.arctouch.codechallenge.model.Movie
+import com.arctouch.codechallenge.model.UpcomingMoviesResponse
 
 interface TmdbDataSource {
 
@@ -17,7 +17,7 @@ interface TmdbDataSource {
         language: String,
         page: Long,
         region: String,
-        success: (movies: List<Movie>) -> Unit,
+        success: (movies: UpcomingMoviesResponse) -> Unit,
         error: (message: String) -> Unit
     )
 

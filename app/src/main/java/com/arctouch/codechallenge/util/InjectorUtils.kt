@@ -1,7 +1,7 @@
 package com.arctouch.codechallenge.util
 
 import android.content.Context
-import com.arctouch.codechallenge.remote.TmdbRemoteDataSource
+import com.arctouch.codechallenge.remote.datasource.TmdbRemoteDataSource
 import com.arctouch.codechallenge.repository.TmdbRepository
 import com.arctouch.codechallenge.viewmodel.factory.ViewModelFactory
 
