@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 
 import com.arctouch.codechallenge.R
 import com.arctouch.codechallenge.model.Movie
@@ -46,7 +47,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateUI(moviesWithGenres: List<Movie>){
-        recyclerView.adapter = HomeAdapter(moviesWithGenres)
+        recyclerView.adapter = HomeAdapter(moviesWithGenres){ movie ->
+            val bundle = Bundle()
+            bundle.putParcelable("movie",movie)
+            view?.findNavController()?.navigate(R.id.action_homeFragment_to_movieDetailFragment,bundle)
+        }
         progressBar.visibility = View.GONE
     }
 
