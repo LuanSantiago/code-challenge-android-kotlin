@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Code Challenge</string>
     <string name="movie_and_genres">%s - %s</string>
+    <string name="overview">Sinopse</string>
+    <string name="error_movie_detail">Não foi possível carregar o filme</string>
+    <string name="no_information">Sem informação</string>
 </resources>
