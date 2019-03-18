@@ -32,12 +32,10 @@ class HomeFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        this.context?.let { context ->
-            val factory = InjectorUtils().provideViewModelFactory(context)
-            viewModel = ViewModelProviders.of(this, factory).get(HomeViewModel::class.java)
-            setupHome()
-            observe()
-        }
+        val factory = InjectorUtils().provideViewModelFactory()
+        viewModel = ViewModelProviders.of(this, factory).get(HomeViewModel::class.java)
+        setupHome()
+        observe()
     }
 
     private fun observe(){
@@ -48,7 +46,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupHome(){
-        progressBar.visibility = View.VISIBLE
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerView.layoutManager = linearLayoutManager
         recyclerView.adapter = homePagedAdapter
@@ -56,7 +53,9 @@ class HomeFragment : Fragment() {
 
     private val homePagedAdapter = HomePagedAdapter{ movie ->
         val bundle = Bundle()
-        bundle.putParcelable("movie",movie)
+        bundle.putLong("movie_id",movie.id.toLong())
+        bundle.putString("movie_poster",movie.posterPath)
+        bundle.putString("movie_backdrop",movie.backdropPath)
         view?.findNavController()?.navigate(R.id.action_homeFragment_to_movieDetailFragment,bundle)
     }
 

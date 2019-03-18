@@ -5,21 +5,17 @@ import com.arctouch.codechallenge.data.Cache
 import com.arctouch.codechallenge.model.Genre
 import com.arctouch.codechallenge.model.Movie
 import com.arctouch.codechallenge.model.UpcomingMoviesResponse
-import com.arctouch.codechallenge.remote.api.TmdbApi
 import com.arctouch.codechallenge.remote.request.TmdbRequest
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class TmdbRemoteDataSource : TmdbDataSource, PageKeyedDataSource<Long, Movie>() {
 
-    private val FIRST_PAGE = 1
-
     override fun loadInitial(
         params: LoadInitialParams<Long>,
         callback: LoadInitialCallback<Long, Movie>
     ) {
-        upcomingMovies(
-            TmdbApi.API_KEY, TmdbApi.DEFAULT_LANGUAGE, FIRST_PAGE.toLong(), TmdbApi.DEFAULT_REGION,
+        upcomingMovies(FIRST_PAGE.toLong(),
             success = {
                 val moviesWithGenres = it.results.map { movie ->
                     movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
@@ -32,7 +28,7 @@ class TmdbRemoteDataSource : TmdbDataSource, PageKeyedDataSource<Long, Movie>() 
     }
 
     override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<Long, Movie>) {
-        upcomingMovies(TmdbApi.API_KEY,TmdbApi.DEFAULT_LANGUAGE,params.key,TmdbApi.DEFAULT_REGION,
+        upcomingMovies(params.key,
             success = {
                 val moviesWithGenres = it.results.map { movie ->
                     movie.copy(genres = Cache.genres.filter { movie.genreIds?.contains(it.id) == true })
@@ -51,14 +47,12 @@ class TmdbRemoteDataSource : TmdbDataSource, PageKeyedDataSource<Long, Movie>() 
     }
 
     override fun getGenres(
-        key: String,
-        language: String,
         success: (genres: List<Genre>) -> Unit,
         error: (message: String) -> Unit
     ) {
         GlobalScope.launch {
-            TmdbRequest().getGenres(key,language,
-                success ={
+            TmdbRequest().getGenres(
+                success = {
                     success(it.genres)
                 },
                 error = {
@@ -68,15 +62,28 @@ class TmdbRemoteDataSource : TmdbDataSource, PageKeyedDataSource<Long, Movie>() 
     }
 
     override fun upcomingMovies(
-        key: String,
-        language: String,
         page: Long,
-        region: String,
         success: (movies: UpcomingMoviesResponse) -> Unit,
         error: (message: String) -> Unit
     ) {
         GlobalScope.launch {
-            TmdbRequest().upcomingMovies(key,language,page,region,
+            TmdbRequest().upcomingMovies(page,
+                success ={
+                    success(it)
+                },
+                error = {
+                    error(it)
+                })
+        }
+    }
+
+    override fun getMovie(
+        id: Long,
+        success: (movie: Movie) -> Unit,
+        error: (message: String) -> Unit
+    ) {
+        GlobalScope.launch {
+            TmdbRequest().getMovie(id,
                 success ={
                     success(it)
                 },
@@ -88,6 +95,7 @@ class TmdbRemoteDataSource : TmdbDataSource, PageKeyedDataSource<Long, Movie>() 
 
     companion object {
         private var INSTANCE: TmdbRemoteDataSource? = null
+        private const val FIRST_PAGE = 1
 
         @JvmStatic
         fun getInstance(): TmdbRemoteDataSource {

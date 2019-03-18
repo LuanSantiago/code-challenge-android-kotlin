@@ -11,11 +11,8 @@ import com.arctouch.codechallenge.remote.datasource.TmdbRemoteDataSource
 class TmdbRepository(private val tmdbRemoteDataSource: TmdbDataSource) {
 
 
-    fun getGenres(
-        key: String,
-        language: String
-    ) {
-        tmdbRemoteDataSource.getGenres(key,language,
+    fun getGenres() {
+        tmdbRemoteDataSource.getGenres(
             success = {
                 Cache.cacheGenres(it)
             },
@@ -24,7 +21,20 @@ class TmdbRepository(private val tmdbRemoteDataSource: TmdbDataSource) {
             })
     }
 
-    fun initializedPagedListBuilder(config: PagedList.Config):
+    fun getMovie(
+        id:Long,
+        success: (movie: Movie) -> Unit,
+        error: (message: String) -> Unit){
+        tmdbRemoteDataSource.getMovie(id,
+            success = {
+                success(it)
+            },
+            error = {
+                error(it)
+            })
+    }
+
+    fun initializedPagedList(config: PagedList.Config):
             LivePagedListBuilder<Long, Movie> {
 
         val dataSourceFactory = object : DataSource.Factory<Long, Movie>() {

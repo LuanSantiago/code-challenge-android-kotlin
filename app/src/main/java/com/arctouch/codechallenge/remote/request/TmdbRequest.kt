@@ -1,19 +1,18 @@
 package com.arctouch.codechallenge.remote.request
 
 import com.arctouch.codechallenge.model.GenreResponse
+import com.arctouch.codechallenge.model.Movie
 import com.arctouch.codechallenge.model.UpcomingMoviesResponse
-import com.arctouch.codechallenge.remote.client.WebClient
+import com.arctouch.codechallenge.remote.api.WebClient
 
 class TmdbRequest {
 
     suspend fun getGenres(
-        key: String,
-        language: String,
         success: (response: GenreResponse) -> Unit,
         error: (message: String) -> Unit
     ) {
         try {
-            val response = WebClient.getClient().genres(key, language).await()
+            val response = WebClient.getClient().genresAsync().await()
             if (response.isSuccessful) {
                 response.body()?.let {
                     success(it)
@@ -26,16 +25,30 @@ class TmdbRequest {
     }
 
     suspend fun upcomingMovies(
-        key: String,
-        language: String,
         page: Long,
-        region: String,
         success: (response: UpcomingMoviesResponse) -> Unit,
         error: (message: String) -> Unit
     ) {
         try {
-            val response = WebClient.getClient()
-                .upcomingMovies(key, language, page, region).await()
+            val response = WebClient.getClient().upcomingMoviesAsync(page).await()
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    success(it)
+                }
+            } else
+                error("error")
+        } catch (e: Exception) {
+            error("error")
+        }
+    }
+
+    suspend fun getMovie(
+        id: Long,
+        success: (movie: Movie) -> Unit,
+        error: (message: String) -> Unit
+    ) {
+        try {
+            val response = WebClient.getClient().movieAsync(id).await()
             if (response.isSuccessful) {
                 response.body()?.let {
                     success(it)
