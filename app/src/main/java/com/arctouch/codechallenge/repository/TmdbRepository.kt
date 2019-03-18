@@ -3,25 +3,42 @@ package com.arctouch.codechallenge.repository
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import com.arctouch.codechallenge.data.Cache
+import com.arctouch.codechallenge.model.Genre
 import com.arctouch.codechallenge.model.Movie
+import com.arctouch.codechallenge.model.UpcomingMoviesResponse
 import com.arctouch.codechallenge.remote.datasource.TmdbDataSource
 import com.arctouch.codechallenge.remote.datasource.TmdbRemoteDataSource
 
-class TmdbRepository(private val tmdbRemoteDataSource: TmdbDataSource) {
+class TmdbRepository(private val tmdbRemoteDataSource: TmdbDataSource): TmdbDataSource {
 
 
-    fun getGenres() {
+    override fun getGenres(
+        success: (genres: List<Genre>) -> Unit,
+        error: (message: String) -> Unit
+    ) {
         tmdbRemoteDataSource.getGenres(
             success = {
-                Cache.cacheGenres(it)
+                success(it)
             },
             error = {
-
+                error(error)
             })
     }
 
-    fun getMovie(
+    override fun upcomingMovies(
+        page: Long,
+        success: (movies: UpcomingMoviesResponse) -> Unit,
+        error: (message: String) -> Unit
+    ) {
+        tmdbRemoteDataSource.upcomingMovies(page,
+            success ={
+                success(it)
+            }, error = {
+                error(error)
+            })
+    }
+
+    override fun getMovie(
         id:Long,
         success: (movie: Movie) -> Unit,
         error: (message: String) -> Unit){
